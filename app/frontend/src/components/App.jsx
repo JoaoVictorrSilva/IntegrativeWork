@@ -1,39 +1,45 @@
 import React from "react";
-import BasicButtons from "./BasicButtons";
-import Header from "./Header";
-import ButtonFollow from "./ButtonFollow";
+import axios from "axios";
 
-function App( ) {
+import Container  from "@mui/material/Container";
+import CssBaseline  from "@mui/material/CssBaseline";
+import Grid  from "@mui/material/Unstable_Grid2";
+import Stack  from "@mui/material/Stack";
 
-  return (
-  <div>
-    <Header/>
-    <h1 class="h1-cursos">Cursos:</h1>
-  
-    <div class="col d-flex justify-content-center">
-      <nav>
-        <ul>
-          <BasicButtons curso="Administração"/>
-          <BasicButtons curso="Agronomia"/>
-          <BasicButtons curso="Ciências da Computação"/>
-          <BasicButtons curso="Enfermagem"/>
-          <BasicButtons curso="Engenharia Ambiental"/>
-          <BasicButtons curso="Geografia"/>
-          <BasicButtons curso="História"/>
-          <BasicButtons curso="Letras"/>
-          <BasicButtons curso="Matemática"/>
-          <BasicButtons curso="Medicina"/>
-          <BasicButtons curso="Pedagogia"/>
-          <ButtonFollow/>
-        </ul>
-      </nav>
-    </div>
+//import Titulo from "./Titulo";
+//import Materias from "./Materias";
+import CadastroLivro from "./CadastroLivro";
 
-    <br />
-    <br />
+axios.defaults.baseURL = "http://localhost:3010/";
+axios.defaults.headers.common["Content-Type"] =
+    "application/json;charset=utf-8";
 
-  </div>
-  );
+function App() {
+    return (
+        <Container sx={{ flexGrow: 1 }} maxWidth="lg" >
+            <CssBaseline />
+            <Grid container justifyContent="center"  spacing={2}>
+                <Grid  md={6}>
+                    <Stack spacing={2}>
+                        
+                        <CadastroLivro/>
+                        
+                    </Stack>
+                </Grid> 
+            </Grid>
+        </Container>
+    );
 }
+
+/*
+function barra_lateral(){
+    return(
+        <Container sx={{flexGrow: 1}} maxWidth="lg">
+
+        </Container>
+    )
+
+}
+*/
 
 export default App;
