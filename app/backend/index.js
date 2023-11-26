@@ -1,20 +1,26 @@
 const express = require("express");
 const cors = require("cors");
+const bodyParser = require('body-parser');
 
 const pgp = require("pg-promise")({});
-
 const usuario = "postgres";
 const senha = "95034107";
-const db = pgp(`postgres://${usuario}:${senha}@localhost:5432/progII`);
+const db = pgp(`postgres://${usuario}:${senha}@localhost:5432/db_biblioteca`);
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
+app.use(bodyParser.json());
 app.listen(3010, () => console.log("Servidor rodando na porta 3010."));
 
 app.post("/login", async (req, res) => {
-
+    const { username, password } = req.body;
+    // Simulated authentication
+    if (username === "your_username" && password === "your_password") {
+        res.status(200).json({ message: "Login successful" });
+    } else {
+        res.status(401).json({ message: "Invalid credentials" });
+    }
 });
 
 //cadastro livro:
@@ -23,9 +29,9 @@ app.post("/livro", async (req, res) => {
         const livroNome = req.body.nome;
         const livroEditora = req.body.editora;
         console.log(`Nome: ${livroNome} - Editora: ${livroEditora}`);
-        db.none(
-            "INSERT INTO livro (nome, editora, estado) VALUES ($1, $2);",
-            [livroNome, livroEditora, `${true}`]
+        await db.none(
+            "INSERT INTO livro (nome, editora, estado) VALUES ($1, $2, $3);",
+            [livroNome, livroEditora, TRUE]
         );
         res.sendStatus(200);
     } catch (error) {
