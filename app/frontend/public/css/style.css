@@ -1,0 +1,109 @@
+html, body, h1, h2, h3, p, ul, li{
+  margin: 0;
+  padding: 0;
+}
+
+body{
+  background-color: #f5f5f5;
+  color: #333;
+  font-family: Arial, sans-serif;
+}
+
+header{
+  background-color: #00693e;
+  color: white;
+  text-align: center;
+  padding: 20px;
+  box-shadow: 5px 5p  x 10px rgba(0, 0, 0);
+}
+
+.logo_uffs{
+  max-width: 200px;
+}
+
+.name-faculdade{
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+.h1-cursos{
+  text-align: center;
+  font-size: 24px;
+  margin: 20px;
+}
+
+nav ul{
+  list-style-type: none;
+  text-align: center;
+  padding: 0;
+}
+
+nav ul li{
+  display: block;
+  margin-right: 10px;
+  margin-top: 10px;
+}
+
+nav a{
+  text-decoration: none;
+  color: #00693e;
+  font-weight: bold;
+}
+
+section{
+  margin: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+section h1{
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.table{
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.table th{
+  background-color: #00693e;
+  color: white;
+  padding: 10px;
+  text-align: center;
+}
+
+.table td, .table th{
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+.table caption{
+  text-align: center;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.table tbody tr:nth-child(even){
+  background-color: #f2f2f2;
+}
+
+.table td{
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.table th[scope="row"]{
+  text-align: center;
+  font-weight: bold;
+}
+
+.ButtonBasic{
+  color: #00693e;
+}

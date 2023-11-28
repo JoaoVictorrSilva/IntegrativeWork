@@ -24,7 +24,7 @@ function TabelaLivro() {
 
     async function getData() {
         try {
-            const res = await axios.get("/livros");
+            const res = await axios.get("/tabela/livros");
             setListaLivros(res.data);
             console.log(res.data);
         } catch (error) {

@@ -1,6 +1,7 @@
 CREATE TABLE aluno (
+  nome VARCHAR(30),
   matricula VARCHAR(30),
-  nome VARCHAR(30)
+  quantidade INTEGER
 );
 
 CREATE TABLE funcionario (

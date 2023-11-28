@@ -1,43 +1,29 @@
 import React from "react";
 
-import Container  from "@mui/material/Container";
-import CssBaseline  from "@mui/material/CssBaseline";
-import Grid  from "@mui/material/Unstable_Grid2";
-import Stack  from "@mui/material/Stack";
+import {BrowserRouter as Router, Route} from "react-router-dom";
+import { Switch } from 'react-router-dom';
 
-//import Materias from "./Materias";
-import CadastroLivro from "./CadastroLivro";
-import TabelaLivro from "./TabelaLivros";
-import Titulo from "./Titulo";
-import Menu from "./Menu";
+import Navbar from "./Navbar";
+import Header from "./Header";
+import Home from "../pages/Home";
+import CadastroLivro from "../pages/CadastroLivro";
+import CadastroAluno from "../pages/CadastroAluno";
+import TabelaLivros from "../pages/TabelaLivros";
 
-function App() {
-    return (
-        <Container sx={{ flexGrow: 1 }} maxWidth="lg" >
-            <CssBaseline />
-            <Grid container justifyContent="center"  spacing={2}>
-                <Grid  md={6}>
-                    <Stack spacing={2}>
-                        <Titulo/>
-                        <Menu/>
-                        <CadastroLivro/>
-                        <TabelaLivro/>          
-                    </Stack>
-                </Grid> 
-            </Grid>
-        </Container>
-    );
+function App( ) {
+
+  return (
+    <Router>
+      <Header/>
+        <Navbar/>
+        <Switch>
+          <Route exact path="/"><Home/></Route>
+          <Route path="/cadastro/livro"><CadastroLivro/></Route>
+          <Route path="/cadastro/aluno"><CadastroAluno/></Route>
+          <Route path="/tabela/livros"><TabelaLivros/></Route>
+        </Switch>
+    </Router>
+  );
 }
-
-/*
-function barra_lateral(){
-    return(
-        <Container sx={{flexGrow: 1}} maxWidth="lg">
-
-        </Container>
-    )
-
-}
-*/
 
 export default App;
