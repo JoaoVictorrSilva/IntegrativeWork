@@ -5,6 +5,7 @@ CREATE TABLE aluno (
 );
 
 CREATE TABLE funcionario (
+  id SERIAL PRIMARY KEY,
   nome VARCHAR(30),
   senha VARCHAR(30)
 );
@@ -12,8 +13,19 @@ CREATE TABLE funcionario (
 CREATE TABLE livro (
   id SERIAL PRIMARY KEY,
   nome VARCHAR(30),
-  editora VARCHAR(30),
+  editora INTEGER,
+  autor INTEGER,
   estado BOOLEAN
+);
+
+CREATE TABLE editora (
+  id SERIAL PRIMARY KEY,
+  nome VARCHAR(30)
+);
+
+CREATE TABLE autor ( -- tabela autor referente apenas ao autor principal do livro
+  id SERIAL PRIMARY KEY,
+  nome VARCHAR(30)
 );
 
 CREATE TABLE emprestimo (
@@ -21,7 +33,8 @@ CREATE TABLE emprestimo (
   id_livro INTEGER,
   matricula INTEGER,
   data_emprestimo DATE,
-  data_devolucao DATE
+  data_devolucao DATE,
+  estado BOOLEAN
 );
 
 INSERT INTO aluno (matricula, nome) VALUES ('2211100072', 'João Victor da Silva');
