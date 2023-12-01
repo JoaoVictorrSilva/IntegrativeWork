@@ -5,7 +5,7 @@ const cors = require('cors');
 const pgp = require("pg-promise")({});
 const usuario = "postgres";
 const senha = "95034107";
-const db = pgp(`postgres://${usuario}:${senha}@localhost:5432/progII`);
+const db = pgp(`postgres://${usuario}:${senha}@localhost:5432/biblioteca`);
 
 const app = express();
 app.use(cors());
@@ -33,7 +33,7 @@ app.post("/cadastro/livro", async (req, res) => {
                 console.log(`Nome: ${livroNome} - Editora: ${livroEditora}`);
                 await db.none(
                     "INSERT INTO livro (nome, editora, estado) VALUES ($1, $2, $3);",
-                    [livroNome, livroEditora, "TRUE"]
+                    [livroNome, livroEditora, true]
                 );
             }
             res.sendStatus(200); // status após o término da inserção
@@ -64,7 +64,7 @@ app.get("/consulta/livro", async (req, res) => {
 });
 
 // atualização:
-app.put("/atualizar/livro/:nome", async (req, res) => {
+app.put("/atualizar/livro", async (req, res) => {
     try {
         const livroNome = req.params.nome;
         const novoNome = req.body.novoNome;
@@ -317,6 +317,14 @@ app.get("/emprestimo/consulta", async (req, res) => {
 });
 
 // atualização de um empréstimo
+app.put("emprestimo/atualizar", async (req, res) => {
+    try {
+
+    }
+    catch (error) {
+
+    }
+});
 
 // exclusão de empréstimo
 
