@@ -5,7 +5,7 @@ const cors = require('cors');
 const pgp = require("pg-promise")({});
 const usuario = "postgres";
 const senha = "95034107";
-const db = pgp(`postgres://${usuario}:${senha}@localhost:5432/biblioteca`);
+const db = pgp(`postgres://${usuario}:${senha}@localhost:5432/db_biblioteca`);
 
 const app = express();
 app.use(cors());
@@ -49,7 +49,7 @@ app.post("/cadastro/livro", async (req, res) => {
 // consulta:
 app.get("/consulta/livro", async (req, res) => {
   try {
-      const livroId = req.params.id;
+      const livroId = req.body.id;
       const livro = await db.oneOrNone("SELECT * FROM livro WHERE id = $1;", [livroId]);
 
       if (livro) {
@@ -66,7 +66,7 @@ app.get("/consulta/livro", async (req, res) => {
 // atualização:
 app.put("/atualizar/livro", async (req, res) => {
     try {
-        const livroNome = req.params.nome;
+        const livroNome = req.body.nome;
         const novoNome = req.body.novoNome;
         const novaEditora = req.body.novaEditora;
         const novoAutor = req.body.novoAutor;
@@ -95,7 +95,7 @@ app.put("/atualizar/livro", async (req, res) => {
 // exclusão:
 app.delete("/delete/livro", async (req, res) => {
   try {
-      const livroId = req.params.id;
+      const livroId = req.body.id;
 
       const livro = await db.oneOrNone("SELECT * FROM livro WHERE id = $1;", [livroId]);
 
@@ -128,7 +128,7 @@ app.get("/consulta/livros", async (req, res) => {
 // livros disponíveis:
 app.get("/consulta/livros/disponiveis", async (req, res) => {
   try {
-      const livros = await db.any("SELECT * FROM livro WHERE status = $1;", true);
+      const livros = await db.any("SELECT * FROM livro WHERE status = $1;", [true]);
       console.log('Retornando todos os livros disponiveis.');
       res.json(livros).status(200);
   } catch (error) {
@@ -140,7 +140,7 @@ app.get("/consulta/livros/disponiveis", async (req, res) => {
 // livros em empréstimos:
 app.get("/consulta/livros/indisponiveis", async (req, res) => {
   try {
-      const livros = await db.any("SELECT * FROM livro WHERE status = FALSE;");
+      const livros = await db.any("SELECT * FROM livro WHERE status = $1;", [false]);
       console.log('Retornando todos os livros em emprestimo.');
       res.json(livros).status(200);
   } catch (error) {
