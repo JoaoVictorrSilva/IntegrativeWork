@@ -25,9 +25,8 @@ CREATE TABLE editora (
 
 CREATE TABLE autor ( -- tabela autor referente apenas ao autor principal do livro
   id SERIAL PRIMARY KEY,
-  nome VARCHAR(30),
-  CONSTRAINT uk_nome UNIQUE (nome)
-);
+  nome VARCHAR(30)
+  );
 
 CREATE TABLE bibliotecario (
   id SERIAL PRIMARY KEY,
