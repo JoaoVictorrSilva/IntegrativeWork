@@ -1,5 +1,5 @@
 # IntegrativeWork
 
- Developed by João Victor da Silva and  Gabriel 
+Developed by Gabriel Schmitz Vieira and  João Victor da Silva.
  
- Este repositório contém o Trabalho Integrador desenvolvido como parte das disciplinas Banco de Dados I, Engenharia de Software I e Programação II.
+This repository contains the Integrative Work developed as part of the Database I, Software Engineering I and Programming II disciplines.
