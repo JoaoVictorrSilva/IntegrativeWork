@@ -1,28 +1,22 @@
 import React from "react";
-
-import {BrowserRouter as Router, Route} from "react-router-dom";
-import { Switch } from 'react-router-dom';
-
-import Navbar from "./Navbar";
 import Header from "./Header";
-import Home from "../pages/Home";
-import CadastroLivro from "../pages/CadastroLivro";
-import CadastroAluno from "../pages/CadastroAluno";
-import TabelaLivros from "../pages/TabelaLivros";
+import CadastroEmprestimo from "./Emprestimo/CadastroEmprestimo";
+//import CadastroAutor from "./Autor/CadastroAutor";
+//import CadastroEditora from "./Editora/CadastroEditora";
+//import CadastroLivro from "./Livros/CadastroLivro";
+//import CadastroAluno from "./Aluno/CadastroAluno";
 
 function App( ) {
 
   return (
-    <Router>
+    <div>
       <Header/>
-        <Navbar/>
-        <Switch>
-          <Route exact path="/"><Home/></Route>
-          <Route path="/cadastro/livro"><CadastroLivro/></Route>
-          <Route path="/cadastro/aluno"><CadastroAluno/></Route>
-          <Route path="/tabela/livros"><TabelaLivros/></Route>
-        </Switch>
-    </Router>
+      <CadastroEmprestimo/>
+      {/* <CadastroAutor/> -- OK -- */}
+      {/* <CadastroEditora/> -- OK --*/}
+      {/* <CadastroAluno/> -- OK -- */}
+      {/* <CadastroLivro/> -- OK -- */}
+    </div>
   );
 }
 
