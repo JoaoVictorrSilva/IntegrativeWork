@@ -13,9 +13,9 @@ app.use(bodyParser.json());
 app.listen(3010, () => console.log("Servidor rodando na porta 3010."));
 
 /* --------------------------------------------------------------------------------------------------------------------------------------------------- */
-// LIVRO -- get/post/put/delete
+// LIVRO -- TUDO OK
 
-// cadastro: -- OK
+// cadastro:
 app.post("/livro/cadastro", async (req, res) => {
     try {
         const livroNome = req.body.nome;
@@ -46,45 +46,14 @@ app.post("/livro/cadastro", async (req, res) => {
     }
 });
 
-// consulta: -- 
-app.get("/consulta/livro", async (req, res) => {
+// consulta:
+app.get("/livro/consulta/:nome", async (req, res) => {
     try {
-        const livroNome = req.body.nome;
-        const livro = await db.oneOrNone("SELECT * FROM livro WHERE nome = $1;", [livroNome]);
+        const livroNome = req.params.nome;
+        const livro = await db.any("SELECT * FROM livro WHERE nome = $1 ORDER BY id;", [livroNome]);
 
         if (livro) {res.status(200).json(livro);} 
-      
         else {res.status(404).send("Livro não encontrado");}
-    } 
-  
-    catch (error) {
-        console.log(error);
-        res.sendStatus(400);
-    }
-});
-
-// atualização: -- 
-app.put("/atualizar/livro", async (req, res) => {
-    try {
-        const livroNome = req.body.nome;
-        const novoNome = req.body.novoNome;
-        const novaEditora = req.body.novaEditora;
-        const novoAutor = req.body.novoAutor;
-        const id_editora = parseInt(novaEditora);
-        const id_autor = parseInt(novoAutor);
-
-        const livrosParaAtualizar = await db.any("SELECT id FROM livro WHERE nome = $1", [livroNome]); // quantidade do mesmo livro para atualizar
-
-        if (livrosParaAtualizar.length > 0) { // true --> tem livro para att
-            await Promise.all(
-                livrosParaAtualizar.map(async (livro) => {
-                    await db.none("UPDATE livro SET nome = $1, id_editora = $2, id_autor = $3 WHERE id = $4",[novoNome, id_editora, id_autor, livro.id]);
-                })
-            );
-            res.sendStatus(200);
-        } 
-        
-        else {res.status(404).send("Nenhum livro encontrado para atualização");}
     } 
     
     catch (error) {
@@ -93,8 +62,39 @@ app.put("/atualizar/livro", async (req, res) => {
     }
 });
 
-// exclusão: --  
-app.delete("/delete/livro", async (req, res) => {
+// atualização:
+app.put("/livro/atualizar", async (req, res) => {
+    try {
+        const livroNome = req.body.nome;
+        const novoNome = req.body.novoNome;
+        const novaEditora = req.body.novaEditora;
+        const novoAutor = req.body.novoAutor;
+        
+        let id_editora = parseInt(novaEditora);
+        let id_autor = parseInt(novoAutor);
+        const existeEditora = await db.oneOrNone("SELECT * FROM editora WHERE id = $1", [id_editora]);
+        const existeAutor = await db.oneOrNone("SELECT * FROM autor WHERE id = $1", [id_autor]);
+
+        const livrosParaAtualizar = await db.any("SELECT id FROM livro WHERE nome = $1", [livroNome]);
+
+        if (livrosParaAtualizar.length > 0 && existeAutor && existeEditora) {
+            await Promise.all(
+                livrosParaAtualizar.map(async (livro) => {
+                    await db.none("UPDATE livro SET nome = $1, id_editora = $2, id_autor = $3 WHERE id = $4", [novoNome, id_editora, id_autor, livro.id]);
+                })
+            );
+            res.sendStatus(200);
+        } else {
+            res.status(404).send("Nenhum livro encontrado para atualização");
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(400);
+    }
+});
+
+// exclusão:
+app.delete("/livro/delete", async (req, res) => {
     try {
         const livroId = req.body.id;
         const id_livro = parseInt(livroId);
@@ -105,7 +105,7 @@ app.delete("/delete/livro", async (req, res) => {
             if(emprestimo){
                 const matricula = await db.oneOrNone("SELECT matricula FROM emprestimo WHERE id_livro = $1 AND estado = $2", [id_livro, true]);
                 await t.none("UPDATE aluno SET quantidade = $1 WHERE matricula = $2", [0, matricula]);
-                await t.none("UPDATE emprestimo SET estado = $1 WHERE livro_id = $2 AND usuario_id = $3", [false, id_livro, matricula]);
+                await t.none("UPDATE emprestimo SET estado = $1 WHERE livro_id = $2 AND matricula = $3", [false, id_livro, matricula]);
             }
             await db.none("DELETE FROM livro WHERE id = $1;", [id_livro]);
             res.sendStatus(200);
@@ -122,7 +122,7 @@ app.delete("/delete/livro", async (req, res) => {
 
 // consultas gerais livros:
 
-// todos os livros cadastrados: -- OK
+// todos os livros cadastrados: 
 app.get("/consulta/livros", async (req, res) => {
     try {
         const livros = await db.any("SELECT * FROM livro ORDER BY nome;");
@@ -136,10 +136,10 @@ app.get("/consulta/livros", async (req, res) => {
     }
 });
 
-// livros disponíveis: -- 
+// livros disponíveis: 
 app.get("/consulta/livros/disponiveis", async (req, res) => {
     try {
-        const livros = await db.any("SELECT * FROM livro WHERE status = $1 ORDER BY nome;", [true]);
+        const livros = await db.any("SELECT * FROM livro WHERE estado = $1 ORDER BY nome;", [true]);
         console.log('Retornando todos os livros disponiveis.');
         res.json(livros).status(200);
     } 
@@ -150,10 +150,10 @@ app.get("/consulta/livros/disponiveis", async (req, res) => {
     }
 });
 
-// livros em empréstimos: -- 
+// livros em empréstimos:
 app.get("/consulta/livros/indisponiveis", async (req, res) => {
     try {
-        const livros = await db.any("SELECT * FROM livro WHERE status = $1 ORDER BY nome;", [false]);
+        const livros = await db.any("SELECT * FROM livro WHERE estado = $1 ORDER BY nome;", [false]);
         console.log('Retornando todos os livros em empréstimo.');
         res.json(livros).status(200);
     } 
@@ -175,10 +175,8 @@ app.post("/aluno/cadastro", async (req, res) => {
         const alunoCadastrado = await db.oneOrNone("SELECT * FROM aluno WHERE matricula = $1", [alunoMatricula]);
 
         if(!alunoCadastrado){
-            console.log(`Nome: ${alunoNome} - Matricula: ${alunoMatricula}`);
-      
-            await db.none("INSERT INTO aluno (nome, matricula, quantidade) VALUES ($1, $2, $3);", [alunoNome, alunoMatricula, 0]);
-    
+            console.log(`Nome: ${alunoNome} - Matricula: ${alunoMatricula}`);     
+            await db.none("INSERT INTO aluno (nome, matricula, estado, quantidade) VALUES ($1, $2, $3, $4);", [alunoNome, alunoMatricula, true, 0]);   
             res.sendStatus(200);
         } 
         
@@ -194,37 +192,44 @@ app.post("/aluno/cadastro", async (req, res) => {
     }
 });
 
-// consulta: -- 
-app.get("/aluno/consulta", async (req, res) => {
+// consulta: -- OK
+app.get("/aluno/consulta/:matricula", async (req, res) => {
     try {
-        const alunoMatr = req.body.matricula;
+        const alunoMatr = req.params.matricula;
         const aluno = await db.oneOrNone("SELECT * FROM aluno WHERE matricula = $1;", [alunoMatr]);
-        if (aluno) {res.status(200).json(aluno);} 
-        else {res.status(404).send("Aluno não encontrado");}
+        
+        if (aluno) {
+            res.status(200).json([aluno]); // Retorna um array com apenas um aluno
+        } else {
+            res.status(404).send("Aluno não encontrado");
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(400);
+    }
+});
+
+// consulta de todos: -- OK
+app.get("/aluno/consultas", async (req, res) => {
+    try {
+        const alunos = await db.any("SELECT * FROM aluno ORDER BY nome");
+        
+        if (alunos.length > 0) {
+            res.status(200).json(alunos);
+            console.log("Retornando todos os alunos");
+        }
+        
+        else {res.status(404).send("Nenhum aluno encontrado");}
     } 
     
     catch (error) {
         console.log(error);
-        res.sendStatus(400);
+        res.sendStatus(500);
     }
 });
 
-// todos
-app.get("/aluno/consultas", async (req, res) => {
-    try {
-        const alunos = await db.any("SELECT * FROM aluno ORDER BY nome;");
-        console.log('Retornando todos os alunos.');
-        res.json(alunos).status(200);
-    } 
-  
-    catch (error) {
-        console.log(error);
-        res.sendStatus(400);
-    }
-});
-
-// atualização: -- no geral ok, mas ver com o professor sobre atualizar o estado (true/false)
-app.put("/atualizar/aluno", async (req, res) => {
+// atualização: -- OK
+app.put("/aluno/atualizar", async (req, res) => {
     try {
         const alunoMatr = req.body.matricula;
         const attNome = req.body.nome;
@@ -232,12 +237,12 @@ app.put("/atualizar/aluno", async (req, res) => {
         const quantidade = parseInt(attQuant);
         const aluno = await db.oneOrNone("SELECT * FROM aluno WHERE matricula = $1;", [alunoMatr]);
 
-        if (aluno) {
+        if (aluno && (quantidade == 1 || quantidade == 0)) {
             await db.none("UPDATE aluno SET nome = $1, quantidade = $2 WHERE matricula = $3;", [attNome, quantidade, alunoMatr]);
             res.sendStatus(200);
         } 
         
-        else {res.status(404).send("Aluno não encontrado");}
+        else {res.status(404).send("Aluno nao encontrado ou dados invalidos");}
     } 
     
     catch (error) {
@@ -245,7 +250,7 @@ app.put("/atualizar/aluno", async (req, res) => {
     }
 });
 
-// exclusão: -- 
+// exclusão: -- OK -- mas arrumar se deletar aluno arrumar emprestimo
 app.delete("/aluno/delete", async (req, res) => {
     try {
         const alunoMatr = req.body.matricula;
@@ -272,24 +277,24 @@ app.delete("/aluno/delete", async (req, res) => {
 /* --------------------------------------------------------------------------------------------------------------------------------------------------- */
 // EMPRÉSTIMOS - DEVOLUÇÃO:
 
-// cadastro de empréstimo: -- 
+// cadastro de empréstimo: -- NÃO OK
 app.post("/emprestimo/cadastro", async (req, res) => {
     try {
         const matricula = req.body.matricula;
-        const livroId = req.body.livroId;
+        const livroId = req.body.idLivro;
         const id_livro = parseInt(livroId);
 
         const livroDisponivel = await db.oneOrNone("SELECT id FROM livro WHERE id = $1 AND estado = $2", [id_livro, true]);
-        const alunoExistente = await db.oneOrNone("SELECT id FROM aluno WHERE matricula = $1", [matricula]);
-        const quantidadeEmprestimos = await db.oneOrNone("SELECT quantidade FROM aluno WHERE matricula = $1", [matricula]);
+        const alunoExistente = await db.oneOrNone("SELECT matricula FROM aluno WHERE matricula = $1", [matricula]);
+        let quantidadeEmprestimos = await db.oneOrNone("SELECT quantidade FROM aluno WHERE matricula = $1", [matricula]);
 
-        if (livroDisponivel && alunoExistente && quantidadeEmprestimos !== null && quantidadeEmprestimos < 3) {
-            const dataEmprestimo = new Date();
-            const dataDevolucao = new Date();
-            dataDevolucao.setDate(dataDevolucao.getDate() + 7); // Devolução em uma semana
+        if (livroDisponivel && alunoExistente && quantidadeEmprestimos !== 1) {
+            //const dataEmprestimo = new Date();
+            //const dataDevolucao = new Date();
+            //dataDevolucao.setDate(dataDevolucao.getDate() + 7); // Devolução em uma semana
 
             await db.tx(async t => {
-                await t.none("INSERT INTO emprestimo (livro_id, matricula, data_emprestimo, data_devolucao, estado) VALUES ($1, $2, $3, $4, $5);", [id_livro, matricula, dataEmprestimo, dataDevolucao, false]);
+                await t.none("INSERT INTO emprestimo (livro_id, matricula, data_emprestimo, data_devolucao, estado) VALUES ($1, $2, $3, $4, $5);", [id_livro, matricula, '2023-01-01', '2023-01-01', false]);
                 await t.none("UPDATE livro SET estado = $1 WHERE id = $2", [false, id_livro]);
                 await t.none("UPDATE aluno SET quantidade = $1 WHERE matricula = $2", [1, matricula]);
             });
@@ -304,9 +309,8 @@ app.post("/emprestimo/cadastro", async (req, res) => {
     }
 });
 
-
-// cadastro de devolução: --  -- perguntar professor se está certo ser post (put?)
-app.post("/emprestimo/devolucao", async (req, res) => {
+// cadastro de devolução:
+app.put("/emprestimo/devolucao", async (req, res) => {
     try {
         const livroId = req.body.idLivro;
         const id_livro = parseInt(livroId);
@@ -357,10 +361,10 @@ app.get("/emprestimo/consulta", async (req, res) => {
     }
 });
 
-// consulta de todos os empréstimos: -- 
+// consulta de todos os empréstimos: -- NAO OK
 app.get("/emprestimo/consultas", async (req, res) => {
     try {
-        const emprestimos = await db.any("SELECT * FROM emprestimo");
+        const emprestimos = await db.any("SELECT * FROM emprestimo ORDER BY id_emp");
         
         if (emprestimos.length > 0) {
             res.status(200).json(emprestimos);
@@ -416,12 +420,12 @@ app.delete("/emprestimo/deletando", async (req, res) => {
 });
 
 /* --------------------------------------------------------------------------------------------------------------------------------------------------- */
-//AUTOR:
+//AUTOR: -- tudo okay
 
-// consulta: -- 
-app.get("/autor/consulta", async (req, res) => {
+// consulta:
+app.get("/autor/consulta/:id", async (req, res) => {
     try {
-        const idAutor = req.body.id_autor;
+        const idAutor = req.params.id;
         const id = parseInt(idAutor);
         const autor = await db.any("SELECT * FROM autor WHERE id = $1", [id]);
         
@@ -439,7 +443,7 @@ app.get("/autor/consulta", async (req, res) => {
     }
 });
 
-// consultas: -- OK
+// consultas:
 app.get("/autor/consultas", async (req, res) => {
     try {
         const autores = await db.any("SELECT * FROM autor ORDER BY nome");
@@ -458,11 +462,11 @@ app.get("/autor/consultas", async (req, res) => {
     }
 });
 
-// atualização: -- 
-app.post("/autor/atualizacao", async (req, res) => {
+// atualização:
+app.put("/autor/atualizar", async (req, res) => {
     try {
-        const idAutor = req.body.id_autor;
-        const novoNome = req.body.novo_nome;
+        const idAutor = req.body.id;
+        const novoNome = req.body.nome;
         const id = parseInt(idAutor);
 
         const autorExistente = await db.oneOrNone("SELECT * FROM autor WHERE id = $1", [id]);
@@ -481,7 +485,7 @@ app.post("/autor/atualizacao", async (req, res) => {
     }
 });
 
-// cadastro: -- OK
+// cadastro:
 app.post("/autor/cadastro", async (req, res) => {
     try {
         const nomeA = req.body.nome;
@@ -502,12 +506,13 @@ app.post("/autor/cadastro", async (req, res) => {
     }
 });
 
-// deletando: -- 
-app.delete("/autor/deletando", async (req, res) => {
+// deletando:
+app.delete("/autor/delete", async (req, res) => {
     try {
-        const idAutor = req.body.id_autor;
+        const idAutor = req.body.id;
         const id = parseInt(idAutor);
         
+        await db.none("UPDATE livro SET id_autor = $1 WHERE id_autor = $2", [0, id]);
         await db.none("DELETE FROM autor WHERE id = $1", [id]);
         
         console.log("Autor deletado");
@@ -521,32 +526,30 @@ app.delete("/autor/deletando", async (req, res) => {
 });
 
 /* --------------------------------------------------------------------------------------------------------------------------------------------------- */
-//EDITORA:
-// consulta: -- 
-app.get("/editora/consulta", async (req, res) => {
+//EDITORA: -- tudo okay
+// consulta:
+app.get("/editora/consulta/:id", async (req, res) => {
     try {
-        const idEditora = req.body.id_editora;
+        const idEditora = req.params.id;
         const id = parseInt(idEditora);
         const editora = await db.any("SELECT * FROM editora WHERE id = $1", [id]);
         
-        if (editora) {
-            res.status(200).json(autor);
-            console.log("Retornando um autor principal");
-        } 
-        
-        else {res.status(404).send("Autor não encontrado");}
-    } 
-    
-    catch (error) {
+        if (editora && editora.length > 0) {
+            res.status(200).json(editora);
+            console.log("Retornando uma editora");
+        } else {
+            res.status(404).send("Editora não encontrada");
+        }
+    } catch (error) {
         console.log(error);
         res.sendStatus(500);
     }
 });
 
-// consulta de todas as editoras: -- OK
+// consulta de todas as editoras:
 app.get("/editora/consultas", async (req, res) => {
     try {
-        const editoras = await db.any("SELECT * FROM editora");
+        const editoras = await db.any("SELECT * FROM editora ORDER BY nome");
         
         if (editoras.length > 0) {
             res.status(200).json(editoras);
@@ -562,11 +565,11 @@ app.get("/editora/consultas", async (req, res) => {
     }
 });
 
-// atualização: -- 
-app.put("/editora/atualizacao", async (req, res) => {
+// atualização:
+app.put("/editora/atualizar", async (req, res) => {
     try {
-        const idEditora = req.body.id_editora;
-        const novoNome = req.body.novo_nome;
+        const idEditora = req.body.id;
+        const novoNome = req.body.nome;
         const id = parseInt(idEditora);
 
         const editoraExistente = await db.oneOrNone("SELECT * FROM editora WHERE id = $1", [id]);
@@ -585,7 +588,7 @@ app.put("/editora/atualizacao", async (req, res) => {
     }
 });
 
-// cadastro: -- OK
+// cadastro:
 app.post("/editora/cadastro", async (req, res) => {
     try {
         const nomeE = req.body.nome;
@@ -603,12 +606,13 @@ app.post("/editora/cadastro", async (req, res) => {
     }
 });
 
-// deletando: -- 
-app.delete("/editora/deletando", async (req, res) => {
+// deletando:
+app.delete("/editora/delete", async (req, res) => {
     try {
-        const idEditora = req.body.id_editora;
+        const idEditora = req.body.id;
         const id = parseInt(idEditora);
         
+        await db.none("UPDATE livro SET id_editora = $1 WHERE id_editora = $2", [0, id]);
         await db.none("DELETE FROM editora WHERE id = $1", [id]);
         
         console.log("Editora deletada");

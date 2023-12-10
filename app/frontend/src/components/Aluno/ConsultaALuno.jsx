@@ -2,27 +2,49 @@ import React from "react";
 import axios from "axios";
 
 import { Alert, Box, Button, Snackbar, Stack, TextField } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+
+const colunas = [
+    { field: "nome", headerName: "Nome", width: 90 },
+    { field: "matricula", headerName: "Matrícula", width: 180 },
+    { field: "estado", headerName: "Estado", width: 180 },
+    { field: "quantidade", headerName: "Quantidade", width: 180 },
+];
 
 axios.defaults.baseURL = "http://localhost:3010/";
 axios.defaults.headers.common["Content-Type"] =
     "application/json;charset=utf-8";
 
-function CadastroLivro() {
-    const [nome, setNome] = React.useState("");
-    const [editora, setEditora] = React.useState("");
+function ConsultaAluno() {
+    const [matrA, setMatr] = React.useState("");
 
     const [openMessage, setOpenMessage] = React.useState(false);
     const [messageText, setMessageText] = React.useState("");
     const [messageSeverity, setMessageSeverity] = React.useState("success");
-    
+
+    const [ListaAlunos, setListaAlunos] = React.useState([]);
+
+    React.useEffect(() => {
+        getData();
+    }, []);
+
+    async function getData() {
+        try {
+            const res = await axios.get("/aluno/"); //arrumar
+            setListaAlunos(res.data);
+            console.log(res.data);
+        } catch (error) {
+            setListaAlunos([]);
+        }
+    }
+
     function clearForm() {
-        setNome("");
-        setEditora("");
+        setMatr("");
     }
 
     function handleCancelClick() {
-        if (nome !== "" || editora !== "") {
-            setMessageText("Cadastro de livro cancelado!");
+        if (matrA !== "") {
+            setMessageText("Consulta do aluno cancelado!");
             setMessageSeverity("warning");
             setOpenMessage(true);
         }
@@ -30,30 +52,27 @@ function CadastroLivro() {
     }
 
     async function handleSubmit() {
-        if (nome !== "" && editora !== "") {
-            try {
-                await axios.post("/livro", {
-                    nome: nome,
-                    editora: editora,
-                });
-                console.log(`Nome: ${nome} - Editora: ${editora}`);
-                setMessageText("Livro cadastrado com sucesso!");
-                setMessageSeverity("success");
-                clearForm(); // limpa o formulário apenas se cadastrado com sucesso
-            } catch (error) {
-                console.log(error);
-                setMessageText("Falha no cadastro do livro!");
-                setMessageSeverity("error");
-            } finally {
-                setOpenMessage(true);
-                //await getData();
-            }
-        } else {
-            setMessageText("Dados do livro inválidos!");
-            setMessageSeverity("warning");
-            setOpenMessage(true);
-        }
-    }
+      if (matrA !== "") {
+          try {
+              const res = await axios.get(`/aluno/consulta/${matrA}`);
+              const alunoConsultado = res.data ? { ...res.data, id: 1 } : null;
+              setListaAlunos(alunoConsultado ? [alunoConsultado] : []);
+              setMessageText("Aluno retornado com sucesso!");
+              setMessageSeverity("success");
+              clearForm();
+          } catch (error) {
+              console.log(error);
+              setMessageText("Falha para encontrar o aluno!");
+              setMessageSeverity("error");
+          } finally {
+              setOpenMessage(true);
+          }
+      } else {
+          setMessageText("Dados do aluno inválidos!");
+          setMessageSeverity("warning");
+          setOpenMessage(true);
+      }
+  }    
 
     function handleCloseMessage(_, reason) {
         if (reason === "clickaway") {
@@ -68,20 +87,12 @@ function CadastroLivro() {
                 <Stack spacing={2}>
                     <TextField
                         required
-                        id="nome-input"
-                        label="Nome"
+                        id="matr-input"
+                        label="Matrícula"
                         size="small"
-                        onChange={(e) => setNome(e.target.value)}
-                        value={nome}
-                    />
-                    <TextField
-                        required
-                        id="editora-input"
-                        label="Editora"
-                        size="small"
-                        onChange={(e) => setEditora(e.target.value)}
-                        value={editora}
-                    />
+                        onChange={(e) => setMatr(e.target.value)}
+                        value={matrA}
+                    />                 
                 </Stack>
                 <Stack direction="row" spacing={3}>
                     <Button
@@ -121,9 +132,12 @@ function CadastroLivro() {
                         {messageText}
                     </Alert>
                 </Snackbar>
+                <Box style={{ height: "500px" }}>
+                    <DataGrid rows={ListaAlunos} columns={colunas} />
+                </Box>
             </Stack>
         </Box>
     );
 }
 
-export default CadastroLivro;
+export default ConsultaAluno;

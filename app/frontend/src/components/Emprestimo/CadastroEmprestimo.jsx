@@ -5,18 +5,18 @@ import { Alert, Box, Button, Snackbar, Stack, TextField } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
 const colunas = [
-    { field: "idE", headerName: "ID Empréstimo", width: 90 },
-    { field: "idL", headerName: "ID Livro", width: 180 },
-    { field: "matr", headerName: "Matrícula", width: 180 },
-    { field: "dataE", headerName: "Data Empréstimo", width: 180 },
-    { field: "dataD", headerName: "Data Devolução", width: 180 },
+    { field: "id_emp", headerName: "ID Empréstimo", width: 90 },
+    { field: "id_livro", headerName: "ID Livro", width: 180 },
+    { field: "matricula", headerName: "Matrícula", width: 180 },
+    { field: "data_emprestimo", headerName: "Data Empréstimo", width: 180 },
+    { field: "data_devolucao", headerName: "Data Devolução", width: 180 },
 ];
 
 axios.defaults.baseURL = "http://localhost:3010/";
 axios.defaults.headers.common["Content-Type"] =
     "application/json;charset=utf-8";
 
-function CadastroLivro() {
+function CadastroEmprestimo() {
     const [idL, setIdL] = React.useState("");
     const [matr, setMatr] = React.useState("");
 
@@ -58,13 +58,13 @@ function CadastroLivro() {
         if (idL !== "" && matr !== "") {
             try {
                 await axios.post("/emprestimo/cadastro", {
-                    livroId: idL,
+                    idLivro: idL,
                     matricula: matr,
                 });
                 console.log(`Nome: ${idL} - Matricula: ${matr}`);
                 setMessageText("Empréstimo cadastrado com sucesso!");
                 setMessageSeverity("success");
-                clearForm(); // limpa o formulário apenas se cadastrado com sucesso
+                clearForm();
             } catch (error) {
                 console.log(error);
                 setMessageText("Falha no cadastro do empréstimo!");
@@ -154,4 +154,4 @@ function CadastroLivro() {
     );
 }
 
-export default CadastroLivro;
+export default CadastroEmprestimo;

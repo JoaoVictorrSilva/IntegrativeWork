@@ -5,17 +5,18 @@ import { Box, Stack } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
 const colunas = [
-    { field: "id", headerName: "ID", width: 90 },
-    { field: "nome", headerName: "LIVRO", width: 180 },
-    { field: "editora", headerName: "EDITORA", width: 180 },
-    { field: "estado", headerName: "ESTADO", width: 180 },
+  { field: "id", headerName: "ID", width: 90 },
+  { field: "nome", headerName: "LIVRO", width: 180 },
+  { field: "id_editora", headerName: "ID EDITORA", width: 180 },
+  { field: "id_autor", headerName: "ID AUTOR", width: 180 },
+  { field: "estado", headerName: "ESTADO", width: 180 },
 ];
 
 axios.defaults.baseURL = "http://localhost:3010/";
 axios.defaults.headers.common["Content-Type"] =
     "application/json;charset=utf-8";
 
-function TabelaLivro() {
+function LivrosDisponiveis() {
     const [listaLivros, setListaLivros] = React.useState([]);
 
     React.useEffect(() => {
@@ -24,7 +25,7 @@ function TabelaLivro() {
 
     async function getData() {
         try {
-            const res = await axios.get("/tabela/livros");
+            const res = await axios.get("/consulta/livros/disponiveis");
             setListaLivros(res.data);
             console.log(res.data);
         } catch (error) {
@@ -43,4 +44,4 @@ function TabelaLivro() {
     );
 }
 
-export default TabelaLivro;
+export default LivrosDisponiveis;

@@ -1,29 +1,23 @@
 import React from "react";
 import axios from "axios";
-
 import { Alert, Box, Button, Snackbar, Stack, TextField } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
 const colunas = [
-    { field: "id", headerName: "ID Livro", width: 90 },
-    { field: "nome", headerName: "Nome", width: 180 },
-    { field: "id_editora", headerName: "ID Editora", width: 180 },
-    { field: "id_autor", headerName: "ID Autor", width: 180 },
-    { field: "estado", headerName: "Estado", width: 180 },
+  { field: "id", headerName: "ID Editora", width: 90 },
+  { field: "nome", headerName: "Nome", width: 180 },
 ];
 
 axios.defaults.baseURL = "http://localhost:3010/";
-axios.defaults.headers.common["Content-Type"] =
-    "application/json;charset=utf-8";
+axios.defaults.headers.common["Content-Type"] = "application/json;charset=utf-8";
 
-function ConsultaLivro() {
-    
-    const [nome, setNome] = React.useState("");
+function DeletarEditora() {
+    const [id, setId] = React.useState("");
+
     const [openMessage, setOpenMessage] = React.useState(false);
     const [messageText, setMessageText] = React.useState("");
     const [messageSeverity, setMessageSeverity] = React.useState("success");
-
-    const [ListaLivros, setListaLivros] = React.useState([]);
+    const [ListaEditoras, setListaEditoras] = React.useState([]);
 
     React.useEffect(() => {
         getData();
@@ -31,21 +25,21 @@ function ConsultaLivro() {
 
     async function getData() {
         try {
-            const res = await axios.get("/consulta/livros");
-            setListaLivros(res.data);
+            const res = await axios.get("/editora/consultas");
+            setListaEditoras(res.data);
             console.log(res.data);
         } catch (error) {
-            setListaLivros([]);
+            setListaEditoras([]);
         }
     }
 
     function clearForm() {
-        setNome("");
+        setId("");
     }
 
     function handleCancelClick() {
-        if (nome !== "") {
-            setMessageText("Consulta do livro cancelado!");
+        if (id !== "") {
+            setMessageText("Delete da editora cancelado!");
             setMessageSeverity("warning");
             setOpenMessage(true);
         }
@@ -53,35 +47,29 @@ function ConsultaLivro() {
     }
 
     async function handleSubmit() {
-        if (nome !== "") {
+        if (id !== "") {
             try {
-                const res = await axios.get(`/livro/consulta/${nome}`);
-                const livrosConsultados = res.data ? res.data.map((livro, index) => ({ ...livro, id: index + 1 })) : [];
-                if (livrosConsultados.length > 0) {
-                    setListaLivros(livrosConsultados);
-                    setMessageText("Livros retornados com sucesso!");
-                    setMessageSeverity("success");
-                    clearForm();
-                } else {
-                    setListaLivros([]);
-                    setMessageText("Livro não encontrado!");
-                    setMessageSeverity("info");
-                }
+                await axios.delete("/editora/delete", {
+                    data: { id: id }
+                })
+                console.log(`Id editora: ${id}`);
+                setMessageText("Editora deletada com sucesso!");
+                setMessageSeverity("success");
+                clearForm();
             } catch (error) {
                 console.log(error);
-                setMessageText("Falha no retorno do livro!");
+                setMessageText("Falha para deletar a editora!");
                 setMessageSeverity("error");
             } finally {
                 setOpenMessage(true);
-                //await getData();
+                await getData();
             }
         } else {
-            setMessageText("Dados do livro inválidos!");
+            setMessageText("Dados da editora inválidos!");
             setMessageSeverity("warning");
             setOpenMessage(true);
-            await getData();
         }
-    }    
+    }
 
     function handleCloseMessage(_, reason) {
         if (reason === "clickaway") {
@@ -96,12 +84,12 @@ function ConsultaLivro() {
                 <Stack spacing={2}>
                     <TextField
                         required
-                        id="nome-input"
-                        label="Nome"
+                        id="id-input"
+                        label="Id Editora"
                         size="small"
-                        onChange={(e) => setNome(e.target.value)}
-                        value={nome}
-                    />                    
+                        onChange={(e) => setId(e.target.value)}
+                        value={id}
+                    />
                 </Stack>
                 <Stack direction="row" spacing={3}>
                     <Button
@@ -128,7 +116,6 @@ function ConsultaLivro() {
                         Cancelar
                     </Button>
                 </Stack>
-
                 <Snackbar
                     open={openMessage}
                     autoHideDuration={6000}
@@ -142,11 +129,11 @@ function ConsultaLivro() {
                     </Alert>
                 </Snackbar>
                 <Box style={{ height: "500px" }}>
-                    <DataGrid rows={ListaLivros} columns={colunas} />
+                    <DataGrid rows={ListaEditoras} columns={colunas} />
                 </Box>
             </Stack>
         </Box>
     );
 }
 
-export default ConsultaLivro;
+export default DeletarEditora;

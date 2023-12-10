@@ -5,10 +5,10 @@ import { Alert, Box, Button, Snackbar, Stack, TextField } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
 const colunas = [
-    { field: "matr", headerName: "Matrícula", width: 90 },
-    { field: "nome", headerName: "Nome", width: 180 },
+    { field: "nome", headerName: "Nome", width: 90 },
+    { field: "matricula", headerName: "Matrícula", width: 180 },
     { field: "estado", headerName: "Estado", width: 180 },
-    { field: "quant", headerName: "Quantidade", width: 180 },
+    { field: "quantidade", headerName: "Quantidade", width: 180 },
 ];
 
 axios.defaults.baseURL = "http://localhost:3010/";
@@ -31,7 +31,7 @@ function CadastroAluno() {
 
     async function getData() {
         try {
-            const res = await axios.get("/aluno/"); //arrumar não esta dando erro ao tentar retornar todos os alunos
+            const res = await axios.get("/aluno/consultas"); //arrumar
             setListaAlunos(res.data);
             console.log(res.data);
         } catch (error) {

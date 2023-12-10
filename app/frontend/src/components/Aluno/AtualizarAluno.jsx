@@ -5,25 +5,26 @@ import { Alert, Box, Button, Snackbar, Stack, TextField } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
 const colunas = [
-    { field: "id", headerName: "ID Livro", width: 90 },
-    { field: "nome", headerName: "Nome", width: 180 },
-    { field: "id_editora", headerName: "ID Editora", width: 180 },
-    { field: "id_autor", headerName: "ID Autor", width: 180 },
+    { field: "nome", headerName: "Nome", width: 90 },
+    { field: "matricula", headerName: "Matrícula", width: 180 },
     { field: "estado", headerName: "Estado", width: 180 },
+    { field: "quantidade", headerName: "Quantidade", width: 180 },
 ];
 
 axios.defaults.baseURL = "http://localhost:3010/";
 axios.defaults.headers.common["Content-Type"] =
     "application/json;charset=utf-8";
 
-function ConsultaLivro() {
-    
-    const [nome, setNome] = React.useState("");
+function AtualizarAluno() {
+    const [matrA, setMatr] = React.useState("");
+    const [AttNome, setAttNome] = React.useState("");
+    const [AttQuant, setAttQuant] = React.useState("");
+
     const [openMessage, setOpenMessage] = React.useState(false);
     const [messageText, setMessageText] = React.useState("");
     const [messageSeverity, setMessageSeverity] = React.useState("success");
 
-    const [ListaLivros, setListaLivros] = React.useState([]);
+    const [ListaAlunos, setListaAlunos] = React.useState([]);
 
     React.useEffect(() => {
         getData();
@@ -31,21 +32,23 @@ function ConsultaLivro() {
 
     async function getData() {
         try {
-            const res = await axios.get("/consulta/livros");
-            setListaLivros(res.data);
+            const res = await axios.get("/aluno/"); //arrumar
+            setListaAlunos(res.data);
             console.log(res.data);
         } catch (error) {
-            setListaLivros([]);
+            setListaAlunos([]);
         }
     }
 
     function clearForm() {
-        setNome("");
+      setMatr("");
+      setAttNome("");
+      setAttQuant("");
     }
 
     function handleCancelClick() {
-        if (nome !== "") {
-            setMessageText("Consulta do livro cancelado!");
+        if (AttNome !== "" || matrA !== "" || AttQuant !== "") {
+            setMessageText("Atualização do aluno cancelada!");
             setMessageSeverity("warning");
             setOpenMessage(true);
         }
@@ -53,35 +56,31 @@ function ConsultaLivro() {
     }
 
     async function handleSubmit() {
-        if (nome !== "") {
+        if (AttNome !== "" && matrA !== "" && AttQuant !== "") {
             try {
-                const res = await axios.get(`/livro/consulta/${nome}`);
-                const livrosConsultados = res.data ? res.data.map((livro, index) => ({ ...livro, id: index + 1 })) : [];
-                if (livrosConsultados.length > 0) {
-                    setListaLivros(livrosConsultados);
-                    setMessageText("Livros retornados com sucesso!");
-                    setMessageSeverity("success");
-                    clearForm();
-                } else {
-                    setListaLivros([]);
-                    setMessageText("Livro não encontrado!");
-                    setMessageSeverity("info");
-                }
+                await axios.put("/aluno/atualizar", {              
+                    matricula: matrA,
+                    nome: AttNome,
+                    quantidade: AttQuant,
+                });
+                console.log(`Nome: ${AttNome} - Matricula: ${matrA}`);
+                setMessageText("Aluno atualizado com sucesso!");
+                setMessageSeverity("success");
+                clearForm(); // limpa o formulário apenas se cadastrado com sucesso
             } catch (error) {
                 console.log(error);
-                setMessageText("Falha no retorno do livro!");
+                setMessageText("Falha ao atualizar o aluno!");
                 setMessageSeverity("error");
             } finally {
                 setOpenMessage(true);
-                //await getData();
+                await getData();
             }
         } else {
-            setMessageText("Dados do livro inválidos!");
+            setMessageText("Dados do aluno inválidos!");
             setMessageSeverity("warning");
             setOpenMessage(true);
-            await getData();
         }
-    }    
+    }
 
     function handleCloseMessage(_, reason) {
         if (reason === "clickaway") {
@@ -96,12 +95,28 @@ function ConsultaLivro() {
                 <Stack spacing={2}>
                     <TextField
                         required
-                        id="nome-input"
-                        label="Nome"
+                        id="matr-input"
+                        label="Matrícula"
                         size="small"
-                        onChange={(e) => setNome(e.target.value)}
-                        value={nome}
-                    />                    
+                        onChange={(e) => setMatr(e.target.value)}
+                        value={matrA}
+                    />  
+                    <TextField
+                        required
+                        id="nome-input"
+                        label="Novo Nome"
+                        size="small"
+                        onChange={(e) => setAttNome(e.target.value)}
+                        value={AttNome}
+                    />
+                    <TextField
+                        required
+                        id="quant-input"
+                        label="Nova Quantidade (0/1)"
+                        size="small"
+                        onChange={(e) => setAttQuant(e.target.value)}
+                        value={AttQuant}
+                    />              
                 </Stack>
                 <Stack direction="row" spacing={3}>
                     <Button
@@ -142,11 +157,11 @@ function ConsultaLivro() {
                     </Alert>
                 </Snackbar>
                 <Box style={{ height: "500px" }}>
-                    <DataGrid rows={ListaLivros} columns={colunas} />
+                    <DataGrid rows={ListaAlunos} columns={colunas} />
                 </Box>
             </Stack>
         </Box>
     );
 }
 
-export default ConsultaLivro;
+export default AtualizarAluno;
