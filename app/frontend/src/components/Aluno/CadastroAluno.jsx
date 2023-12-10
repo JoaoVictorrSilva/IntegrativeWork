@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import Header from "../Header";
 
 import { Alert, Box, Button, Snackbar, Stack, TextField } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -31,7 +32,7 @@ function CadastroAluno() {
 
     async function getData() {
         try {
-            const res = await axios.get("/aluno/consultas"); //arrumar
+            const res = await axios.get("/aluno/"); //arrumar
             setListaAlunos(res.data);
             console.log(res.data);
         } catch (error) {
@@ -88,6 +89,7 @@ function CadastroAluno() {
 
     return (
         <Box>
+            <Header/>
             <Stack spacing={2}>
                 <Stack spacing={2}>
                     <TextField

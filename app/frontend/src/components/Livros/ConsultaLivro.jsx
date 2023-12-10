@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import Header from "../Header";
 
 import { Alert, Box, Button, Snackbar, Stack, TextField } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -92,6 +93,7 @@ function ConsultaLivro() {
 
     return (
         <Box>
+            <Header/>
             <Stack spacing={2}>
                 <Stack spacing={2}>
                     <TextField

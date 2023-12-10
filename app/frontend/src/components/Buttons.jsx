@@ -1,94 +1,226 @@
-import * as React from 'react';
-import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import ClickAwayListener from '@mui/material/ClickAwayListener';
-import Grow from '@mui/material/Grow';
-import Paper from '@mui/material/Paper';
-import Popper from '@mui/material/Popper';
-import MenuItem from '@mui/material/MenuItem';
-import MenuList from '@mui/material/MenuList';
+import React, { useState } from "react";
+import { BrowserRouter as Router, Link } from "react-router-dom";
+import { Button, Container, Menu, MenuItem } from "@mui/material";
+import Header from "./Header";
 
-const options = ['Atualizar', 'Cadastrar', 'Consultar', 'Deletar', 'Disponíveis', 'Indisponíveis', 'Tabela'];
-
-export default function Buttons() {
-  const [open, setOpen] = React.useState(false);
-  const anchorRef = React.useRef(null);
-  const [selectedIndex, setSelectedIndex] = React.useState(1);
-
-  const handleClick = () => {
-    console.info(`You clicked ${options[selectedIndex]}`);
+function Buttons() {
+  const [alunoAnchorEl, setAlunoAnchorEl] = useState(null);
+  const handleAlunoMenuClick = (event) => {
+    setAlunoAnchorEl(event.currentTarget);
+  };
+  const handleAlunoMenuClose = () => {
+    setAlunoAnchorEl(null);
   };
 
-  const handleMenuItemClick = (event, index) => {
-    setSelectedIndex(index);
-    setOpen(false);
+  const [autorAnchorEl, setAutorAnchorEl] = useState(null);
+  const handleAutorMenuClick = (event) => {
+    setAutorAnchorEl(event.currentTarget);
+  };
+  const handleAutorMenuClose = () => {
+    setAutorAnchorEl(null);
   };
 
-  const handleToggle = () => {
-    setOpen((prevOpen) => !prevOpen);
+  const [editoraAnchorEl, setEditoraAnchorEl] = useState(null);
+  const handleEditoraMenuClick = (event) => {
+    setEditoraAnchorEl(event.currentTarget);
+  };
+  const handleEditoraMenuClose = () => {
+    setEditoraAnchorEl(null);
   };
 
-  const handleClose = (event) => {
-    if (anchorRef.current && anchorRef.current.contains(event.target)) {
-      return;
-    }
+  const [emprestimoAnchorEl, setEmprestimoAnchorEl] = useState(null);
+  const handleEmprestimoMenuClick = (event) => {
+    setEmprestimoAnchorEl(event.currentTarget);
+  };
+  const handleEmprestimoMenuClose = () => {
+    setEmprestimoAnchorEl(null);
+  };
 
-    setOpen(false);
+  const [livroAnchorEl, setLivroAnchorEl] = useState(null);
+  const handleLivroMenuClick = (event) => {
+    setLivroAnchorEl(event.currentTarget);
+  };
+  const handleLivroMenuClose = () => {
+    setLivroAnchorEl(null);
   };
 
   return (
-    <React.Fragment>
-      <ButtonGroup variant="contained" ref={anchorRef} aria-label="split button">
-        <Button onClick={handleClick}>LIVRO</Button>
-        <Button
-          size="small"
-          aria-controls={open ? 'split-button-menu' : undefined}
-          aria-expanded={open ? 'true' : undefined}
-          aria-label="select merge strategy"
-          aria-haspopup="menu"
-          onClick={handleToggle}
-        >
-          <ArrowDropDownIcon />
-        </Button>
-      </ButtonGroup>
-      <Popper
-        sx={{
-          zIndex: 1,
-        }}
-        open={open}
-        anchorEl={anchorRef.current}
-        role={undefined}
-        transition
-        disablePortal
-      >
-        {({ TransitionProps, placement }) => (
-          <Grow
-            {...TransitionProps}
-            style={{
-              transformOrigin:
-                placement === 'bottom' ? 'center top' : 'center bottom',
-            }}
+    <div>
+      <Header />
+      <Container maxWidth="md">
+        <nav>
+          <Button
+            aria-controls="aluno-menu"
+            aria-haspopup="true"
+            onClick={handleAlunoMenuClick}
+            variant="contained"
+            color="primary"
+            style={{ margin: "10px" }}
           >
-            <Paper>
-              <ClickAwayListener onClickAway={handleClose}>
-                <MenuList id="split-button-menu" autoFocusItem>
-                  {options.map((option, index) => (
-                    <MenuItem
-                      key={option}
-                     
-                      selected={index === selectedIndex}
-                      onClick={(event) => handleMenuItemClick(event, index)}
-                    >
-                      {option}
-                    </MenuItem>
-                  ))}
-                </MenuList>
-              </ClickAwayListener>
-            </Paper>
-          </Grow>
-        )}
-      </Popper>
-    </React.Fragment>
+            Aluno
+          </Button>
+          <Menu
+            id="aluno-menu"
+            anchorEl={alunoAnchorEl}
+            open={Boolean(alunoAnchorEl)}
+            onClose={handleAlunoMenuClose}
+          >
+            <MenuItem component={Link} to="/aluno/cadastrar" onClick={handleAlunoMenuClose}>
+              Cadastrar
+             </MenuItem>
+             <MenuItem component={Link} to="/aluno/atualizar" onClick={handleAlunoMenuClose}>
+              Atualizar
+             </MenuItem>
+             <MenuItem component={Link} to="/aluno/consulta" onClick={handleAlunoMenuClose}>
+              Pesquisar
+             </MenuItem>
+             <MenuItem component={Link} to="/aluno/delete" onClick={handleAlunoMenuClose}>
+              Deletar
+             </MenuItem>
+        </Menu>
+
+          <Button
+            aria-controls="autor-menu"
+            aria-haspopup="true"
+            onClick={handleAutorMenuClick}
+            variant="contained"
+            color="primary"
+            style={{ margin: "10px" }}
+          >
+            Autor
+          </Button>
+          <Menu
+            id="autor-menu"
+            anchorEl={autorAnchorEl}
+            open={Boolean(autorAnchorEl)}
+            onClose={handleAutorMenuClose}
+          >
+            <MenuItem component={Link} to="/autor/atualizar" onClick={handleAutorMenuClose}>
+              Atualizar
+             </MenuItem>
+             <MenuItem component={Link} to="/autor/cadastrar" onClick={handleAutorMenuClose}>
+              Cadastrar
+             </MenuItem>
+             <MenuItem component={Link} to="/autor/consulta" onClick={handleAutorMenuClose}>
+              Consulta
+             </MenuItem>
+             <MenuItem component={Link} to="/autor/delete" onClick={handleAutorMenuClose}>
+              Deletar
+             </MenuItem>
+             <MenuItem component={Link} to="/autor/tabela" onClick={handleAutorMenuClose}>
+              Tabela
+             </MenuItem>
+        </Menu>
+
+          <Button
+            aria-controls="editora-menu"
+            aria-haspopup="true"
+            onClick={handleEditoraMenuClick}
+            variant="contained"
+            color="primary"
+            style={{ margin: "10px" }}
+          >
+            Editora
+          </Button>
+          <Menu
+            id="editora-menu"
+            anchorEl={editoraAnchorEl}
+            open={Boolean(editoraAnchorEl)}
+            onClose={handleEditoraMenuClose}
+          >
+            <MenuItem component={Link} to="/editora/atualizar" onClick={handleEditoraMenuClose}>
+              Atualizar
+            </MenuItem>
+            <MenuItem component={Link} to="/editora/cadastrar" onClick={handleEditoraMenuClose}>
+              Cadastrar
+            </MenuItem>
+            <MenuItem component={Link} to="/editora/consulta" onClick={handleEditoraMenuClose}>
+              Consulta
+            </MenuItem>
+            <MenuItem component={Link} to="/editora/delete" onClick={handleEditoraMenuClose}>
+              Deletar
+            </MenuItem>
+            <MenuItem component={Link} to="/editora/tabela" onClick={handleEditoraMenuClose}>
+              Tabela
+            </MenuItem>
+        </Menu>
+
+        <Button
+            aria-controls="emprestimo-menu"
+            aria-haspopup="true"
+            onClick={handleEmprestimoMenuClick}
+            variant="contained"
+            color="primary"
+            style={{ margin: "10px" }}
+          >
+            Empréstimo
+          </Button>
+          <Menu
+            id="emprestimo-menu"
+            anchorEl={emprestimoAnchorEl}
+            open={Boolean(emprestimoAnchorEl)}
+            onClose={handleEmprestimoMenuClose}
+          >
+            <MenuItem component={Link} to="/emprestimo/atualizar" onClick={handleEmprestimoMenuClose}>
+              Atualizar
+            </MenuItem>
+            <MenuItem component={Link} to="/emprestimo/cadastrar" onClick={handleEmprestimoMenuClose}>
+              Cadastrar
+            </MenuItem>
+            <MenuItem component={Link} to="/emprestimo/consulta" onClick={handleEmprestimoMenuClose}>
+              Consulta
+            </MenuItem>
+            <MenuItem component={Link} to="/emprestimo/delete" onClick={handleEmprestimoMenuClose}>
+              Deletar
+            </MenuItem>
+            <MenuItem component={Link} to="/emprestimo/tabela" onClick={handleEmprestimoMenuClose}>
+              Tabela
+            </MenuItem>
+          </Menu>
+
+          <Button
+            aria-controls="livro-menu"
+            aria-haspopup="true"
+            onClick={handleLivroMenuClick}
+            variant="contained"
+            color="primary"
+            style={{ margin: "10px" }}
+          >
+            Livro
+          </Button>
+          <Menu
+            id="livro-menu"
+            anchorEl={livroAnchorEl}
+            open={Boolean(livroAnchorEl)}
+            onClose={handleLivroMenuClose}
+          >
+            <MenuItem component={Link} to="/livro/atualizar" onClick={handleLivroMenuClose}>
+              Atualizar
+            </MenuItem>
+            <MenuItem component={Link} to="/livro/cadastrar" onClick={handleLivroMenuClose}>
+              Cadastrar
+            </MenuItem>
+            <MenuItem component={Link} to="/livro/consulta" onClick={handleLivroMenuClose}>
+              Consulta
+            </MenuItem>
+            <MenuItem component={Link} to="/livro/delete" onClick={handleLivroMenuClose}>
+              Deletar
+            </MenuItem>
+            <MenuItem component={Link} to="/livro/disponiveis" onClick={handleLivroMenuClose}>
+              Tabela Disponíveis
+            </MenuItem>
+            <MenuItem component={Link} to="/livro/indisponiveis" onClick={handleLivroMenuClose}>
+              Tabela Indisponíveis
+            </MenuItem>
+            <MenuItem component={Link} to="/livro/tabela" onClick={handleLivroMenuClose}>
+              Tabela
+            </MenuItem>
+          </Menu>
+
+        </nav>
+      </Container>
+    </div>
   );
 }
+
+export default Buttons;

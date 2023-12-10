@@ -3,6 +3,7 @@ import axios from "axios";
 
 import { Alert, Box, Button, Snackbar, Stack, TextField } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import Header from "../Header";
 
 const colunas = [
     { field: "nome", headerName: "Nome", width: 90 },
@@ -91,6 +92,7 @@ function AtualizarAluno() {
 
     return (
         <Box>
+            <Header/>
             <Stack spacing={2}>
                 <Stack spacing={2}>
                     <TextField

@@ -12,6 +12,12 @@ app.use(cors());
 app.use(bodyParser.json());
 app.listen(3010, () => console.log("Servidor rodando na porta 3010."));
 
+// ReactDOM.createRoot(document.getElementById('root')).render(
+//     <React.StrictMode>
+//         <App />
+//     </React.StrictMode>
+// )
+
 /* --------------------------------------------------------------------------------------------------------------------------------------------------- */
 // LIVRO -- TUDO OK
 

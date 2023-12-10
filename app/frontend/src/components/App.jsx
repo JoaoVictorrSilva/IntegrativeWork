@@ -1,81 +1,65 @@
 import React from "react";
-import Header from "./Header";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Buttons from "./Buttons";
 
-import ButtonLivro from "./Buttons/ButtonLivro";
-import ButtonAluno from "./Buttons/ButtonAluno";
-import ButtonAutor from "./Buttons/ButtonAutor";
-import ButtonEditora from "./Buttons/ButtonEditora";
-import ButtonEmprestimo from "./Buttons/ButtonEmprestimo";
+import CadastroLivro from "./Livros/CadastroLivro";
+import LivrosIndisponiveis from "./Livros/LivrosIndisponiveis";
+import LivrosDisponiveis from "./Livros/LivrosDisponiveis";
+import DeletarLivro from "./Livros/DeletarLivro";
+import TabelaLivro from "./Livros/TabelaLivros";
+import AtualizarLivro from "./Livros/AtualizarLivro";
+import ConsultaLivro from "./Livros/ConsultaLivro";
 
-//import CadastroLivro from "./Livros/CadastroLivro";
-//import LivrosIndisponiveis from "./Livros/LivrosIndisponiveis";
-//import LivrosDisponiveis from "./Livros/LivrosDisponiveis";
-//import DeletarLivro from "./Livros/DeletarLivro";
-//import TabelaLivro from "./Livros/TabelaLivros";
-//import AtualizarLivro from "./Livros/AtualizarLivro";
-//import ConsultaLivro from "./Livros/ConsultaLivro";
+import CadastroAluno from "./Aluno/CadastroAluno";
+import AtualizarAluno from "./Aluno/AtualizarAluno";
+import ConsultaAluno from "./Aluno/ConsultaALuno";
+import DeletarAluno from "./Aluno/DeletarAluno";
 
-//import CadastroAluno from "./Aluno/CadastroAluno";
-//import AtualizarAluno from "./Aluno/AtualizarAluno";
-//import ConsultaAluno from "./Aluno/ConsultaALuno";
-//import DeletarAluno from "./Aluno/DeletarAluno";
+import CadastroAutor from "./Autor/CadastroAutor";
+import ConsultaAutor from "./Autor/ConsultaAutor";
+import TabelaAutor from "./Autor/TabelaAutor";
+import AtualizarAutor from "./Autor/AtualizarAutor";
+import DeletarAutor from "./Autor/DeletarAutor";
 
-//import CadastroEmprestimo from "./Emprestimo/CadastroEmprestimo";
-
-//import CadastroAutor from "./Autor/CadastroAutor";
-//import ConsultaAutor from "./Autor/ConsultaAutor";
-//import TabelaAutor from "./Autor/TabelaAutor";
-//import AtualizarAutor from "./Autor/AtualizarAutor";
-//import DeletarAutor from "./Autor/DeletarAutor";
-
-//import CadastroEditora from "./Editora/CadastroEditora";
-//import AtualizarEditora from "./Editora/AtualizarEditora";
-//import DeletarEditora from "./Editora/DeletarEditora";
-//import TabelaEditora from "./Editora/TabelaEditora";
-//import ConsultaEditora from "./Editora/ConsultaEditora";
+import CadastroEditora from "./Editora/CadastroEditora";
+import AtualizarEditora from "./Editora/AtualizarEditora";
+import DeletarEditora from "./Editora/DeletarEditora";
+import TabelaEditora from "./Editora/TabelaEditora";
+import ConsultaEditora from "./Editora/ConsultaEditora";
 
 function App( ) {
 
   return (
-    <div style={{textAlign: 'center'}}>
-      <Header/>
-      <div className="main">
-      <ul style={{ listStyleType: 'none', padding: 0 }}>
-        <li style={{ marginBottom: '10px' }}><ButtonAluno className='ButtonBasic'/></li>
-        <li style={{ marginBottom: '10px' }}><ButtonAutor className='ButtonBasic'/></li>
-        <li style={{ marginBottom: '10px' }}><ButtonLivro className='ButtonBasic'/></li>
-        <li style={{ marginBottom: '10px' }}><ButtonEditora className='ButtonBasic'/></li>
-        <li style={{ marginBottom: '10px' }}><ButtonEmprestimo className='ButtonBasic'/></li>
-      </ul>
-      </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Buttons />} />
+        <Route path="/aluno/cadastrar" element={<CadastroAluno/>} />
+        <Route path="/aluno/atualizar" element={<AtualizarAluno/>} />
+        <Route path="/aluno/consulta" element={<ConsultaAluno/>} />
+        <Route path="aluno/delete" element={<DeletarAluno/>} />
 
-      {/* <CadastroAluno/> */}
-      {/* <AtualizarAluno /> */}
-      {/* <ConsultaAluno/> -- OK só não aparece os dados do aluno pesquisado na tabela */}
-      {/* <DeletarAluno/> */}
+        <Route path="/autor/atualizar" element={<AtualizarAutor />} />
+        <Route path="/autor/cadastrar" element={<CadastroAutor />} />
+        <Route path="/autor/consulta" element={<ConsultaAutor />} />
+        <Route path="/autor/delete" element={<DeletarAutor />} />
+        <Route path="/autor/tabela" element={<TabelaAutor />} />
 
-      {/* <CadastroLivro/> */}
-      {/* <ConsultaLivro/> */}
-      {/* <AtualizarLivro/> */}
-      {/* <DeletarLivro/> */}
-      {/* <TabelaLivro/> */}
-      {/* <LivrosDisponiveis/> */}
-      {/* <LivrosIndisponiveis/> */}
+        <Route path="/editora/atualizar" element={<AtualizarEditora/>}/>
+        <Route path="/editora/cadastrar" element={<CadastroEditora/>}/>
+        <Route path="/editora/consulta" element={<ConsultaEditora/>}/>
+        <Route path="/editora/delete" element={<DeletarEditora/>}/>
+        <Route path="/editora/tabela" element={<TabelaEditora/>}/>
 
-      {/* <CadastroEmprestimo/> */}
+        <Route path="/livro/atualizar" element={<AtualizarLivro/>}/>
+        <Route path="/livro/cadastrar" element={<CadastroLivro/>}/>
+        <Route path="/livro/consulta" element={<ConsultaLivro/>}/>
+        <Route path="/livro/delete" element={<DeletarLivro/>}/>
+        <Route path="/livro/disponiveis" element={<LivrosDisponiveis/>}/>
+        <Route path="/livro/indisponiveis" element={<LivrosIndisponiveis/>}/>
+        <Route path="/livro/tabela" element={<TabelaLivro/>}/>
 
-      {/* <CadastroAutor/> */}
-      {/* <ConsultaAutor/> */}
-      {/* <TabelaAutor/> */}
-      {/* <AtualizarAutor/> */}
-      {/* <DeletarAutor/> */}
-
-      {/* <CadastroEditora/> */}
-      {/* <AtualizarEditora/> */}
-      {/* <DeletarEditora/> */}
-      {/* <TabelaEditora/> */}
-      {/* <ConsultaEditora/> */}
-    </div>
+      </Routes>
+    </Router>
   );
 }
 
