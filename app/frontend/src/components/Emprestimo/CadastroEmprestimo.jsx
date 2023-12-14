@@ -2,6 +2,9 @@ import React from "react";
 import axios from "axios";
 import Header from "../Header";
 
+//style
+import "./StyleCadastroEmprestimo.css";
+
 import { Alert, Box, Button, Snackbar, Stack, TextField } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
@@ -9,6 +12,7 @@ const colunas = [
     { field: "id_emp", headerName: "ID Empréstimo", width: 90 },
     { field: "id_livro", headerName: "ID Livro", width: 180 },
     { field: "matricula", headerName: "Matrícula", width: 180 },
+    { field: "estado", headerName: "Estado", width: 180 },
     { field: "data_emprestimo", headerName: "Data Empréstimo", width: 180 },
     { field: "data_devolucao", headerName: "Data Devolução", width: 180 },
 ];
@@ -25,7 +29,7 @@ function CadastroEmprestimo() {
     const [messageText, setMessageText] = React.useState("");
     const [messageSeverity, setMessageSeverity] = React.useState("success");
 
-    const [ListaEmpr, setListaEmpr] = React.useState([]);
+    const [ListaEmpr, setListaEmp] = React.useState([]);
 
     React.useEffect(() => {
         getData();
@@ -33,11 +37,12 @@ function CadastroEmprestimo() {
 
     async function getData() {
         try {
-            const res = await axios.get("/emprestimo/consutas");
-            setListaEmpr(res.data);
-            console.log(res.data);
+            const res = await axios.get("/emprestimo/consultas");
+            const empComId = res.data.map((emp, index) => ({ ...emp, id: index + 1 }));
+            setListaEmp(empComId);
+            console.log(empComId);
         } catch (error) {
-          setListaEmpr([]);
+            setListaEmp([]);
         }
     }
 
@@ -59,8 +64,8 @@ function CadastroEmprestimo() {
         if (idL !== "" && matr !== "") {
             try {
                 await axios.post("/emprestimo/cadastro", {
-                    idLivro: idL,
                     matricula: matr,
+                    idLivro: idL,
                 });
                 console.log(`Nome: ${idL} - Matricula: ${matr}`);
                 setMessageText("Empréstimo cadastrado com sucesso!");
@@ -91,7 +96,7 @@ function CadastroEmprestimo() {
     return (
         <Box>
             <Header/>
-            <Stack spacing={2}>
+            <Stack className="text" spacing={2}>
                 <Stack spacing={2}>
                     <TextField
                         required
@@ -119,7 +124,7 @@ function CadastroEmprestimo() {
                         }}
                         onClick={handleSubmit}
                         type="submit"
-                        color="primary"
+                        color="success"
                     >
                         Enviar
                     </Button>
@@ -149,7 +154,7 @@ function CadastroEmprestimo() {
                     </Alert>
                 </Snackbar>
                 <Box style={{ height: "500px" }}>
-                    <DataGrid rows={ListaEmpr} columns={colunas} />
+                    <DataGrid rows={ListaEmpr} columns={colunas} getRowId={(row) => row.id_emp} />
                 </Box>
             </Stack>
         </Box>

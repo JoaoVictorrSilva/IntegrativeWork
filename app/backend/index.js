@@ -4,19 +4,13 @@ const cors = require('cors');
 
 const pgp = require("pg-promise")({});
 const usuario = "postgres";
-const senha = "95034107";
+const senha = "gabriel09";
 const db = pgp(`postgres://${usuario}:${senha}@localhost:5432/db_biblioteca`);
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.listen(3010, () => console.log("Servidor rodando na porta 3010."));
-
-// ReactDOM.createRoot(document.getElementById('root')).render(
-//     <React.StrictMode>
-//         <App />
-//     </React.StrictMode>
-// )
 
 /* --------------------------------------------------------------------------------------------------------------------------------------------------- */
 // LIVRO -- TUDO OK
@@ -28,19 +22,19 @@ app.post("/livro/cadastro", async (req, res) => {
         const livroAutor = req.body.autor;
         const livroEditora = req.body.editora;
         const livroQuantidade = req.body.quantidade;
-        const quantidade = parseInt(livroQuantidade); //quantidade do mesmo livro a ser cadastrado
+        const quantidade = parseInt(livroQuantidade);
 
-        const livroCadastrado = await db.oneOrNone("SELECT id FROM livro WHERE nome = $1", [livroNome]);
         const id_editora = await db.oneOrNone("SELECT id FROM editora WHERE nome = $1;", [livroEditora]);
         const id_autor = await db.oneOrNone("SELECT id FROM autor WHERE nome = $1", [livroAutor]);
 
-        if (id_editora && id_autor && !livroCadastrado) {
+        if (id_editora && id_autor) {
             console.log(`Cadastrando o livro "${livroNome}" - ${quantidade} total`);
             for (let i = 0; i < quantidade; i++) {
-                await db.none("INSERT INTO livro (nome, id_editora, id_autor, estado) VALUES ($1, $2, $3, $4);", [livroNome, id_editora.id, id_autor.id, true]);
+                await db.none("INSERT INTO livro (nome, id_editora, id_autor, estado) VALUES ($1, $2, $3, $4);", 
+                [livroNome, id_editora.id, id_autor.id, true]);
             }
             
-            res.sendStatus(200); // status após o término da inserção
+            res.sendStatus(200);
         } 
         
         else {res.status(404).send("Informações inválidas para cadastro");}
@@ -56,7 +50,7 @@ app.post("/livro/cadastro", async (req, res) => {
 app.get("/livro/consulta/:nome", async (req, res) => {
     try {
         const livroNome = req.params.nome;
-        const livro = await db.any("SELECT * FROM livro WHERE nome = $1 ORDER BY id;", [livroNome]);
+        const livro = await db.any("SELECT id, nome, id_autor, id_editora, CASE WHEN estado = true THEN 'Disponível' WHEN estado = false THEN 'Indisponível' END AS estado FROM livro WHERE nome = $1 ORDER BY id;", [livroNome]);
 
         if (livro) {res.status(200).json(livro);} 
         else {res.status(404).send("Livro não encontrado");}
@@ -105,13 +99,14 @@ app.delete("/livro/delete", async (req, res) => {
         const livroId = req.body.id;
         const id_livro = parseInt(livroId);
         const livro = await db.oneOrNone("SELECT * FROM livro WHERE id = $1;", [id_livro]);
-        const emprestimo = await db.oneOrNone("SELECT * FROM emprestimo WHERE id_livro = $1 AND estado = $2", [id_livro, true]);
 
         if (livro) {
+            const emprestimo = await db.oneOrNone("SELECT * FROM emprestimo WHERE id_livro = $1 AND estado = $2", [id_livro, false]);
             if(emprestimo){
-                const matricula = await db.oneOrNone("SELECT matricula FROM emprestimo WHERE id_livro = $1 AND estado = $2", [id_livro, true]);
-                await t.none("UPDATE aluno SET quantidade = $1 WHERE matricula = $2", [0, matricula]);
-                await t.none("UPDATE emprestimo SET estado = $1 WHERE livro_id = $2 AND matricula = $3", [false, id_livro, matricula]);
+                await db.tx(async t => {
+                    await t.none("UPDATE aluno SET quantidade = $1 WHERE matricula = $2", [0, emprestimo.matricula]);
+                    await t.none("UPDATE emprestimo SET estado = $1 WHERE id_livro = $2 AND estado = $3 AND matricula = $4", [true, id_livro, false, emprestimo.matricula]);           
+                });
             }
             await db.none("DELETE FROM livro WHERE id = $1;", [id_livro]);
             res.sendStatus(200);
@@ -131,7 +126,7 @@ app.delete("/livro/delete", async (req, res) => {
 // todos os livros cadastrados: 
 app.get("/consulta/livros", async (req, res) => {
     try {
-        const livros = await db.any("SELECT * FROM livro ORDER BY nome;");
+        const livros = await db.any("SELECT id, nome, id_autor, id_editora, estado, CASE WHEN estado = true THEN 'Disponível' WHEN estado = false THEN 'Indisponível' END AS estado FROM livro ORDER BY nome;");
         console.log('Retornando todos os livros.');
         res.json(livros).status(200);
     } 
@@ -145,7 +140,7 @@ app.get("/consulta/livros", async (req, res) => {
 // livros disponíveis: 
 app.get("/consulta/livros/disponiveis", async (req, res) => {
     try {
-        const livros = await db.any("SELECT * FROM livro WHERE estado = $1 ORDER BY nome;", [true]);
+        const livros = await db.any("SELECT id, nome, id_editora, id_autor, CASE WHEN estado = true THEN 'Disponível' END AS estado FROM livro WHERE estado = $1 ORDER BY nome;", [true]);
         console.log('Retornando todos os livros disponiveis.');
         res.json(livros).status(200);
     } 
@@ -159,7 +154,7 @@ app.get("/consulta/livros/disponiveis", async (req, res) => {
 // livros em empréstimos:
 app.get("/consulta/livros/indisponiveis", async (req, res) => {
     try {
-        const livros = await db.any("SELECT * FROM livro WHERE estado = $1 ORDER BY nome;", [false]);
+        const livros = await db.any("SELECT id, nome, id_editora, id_autor, CASE WHEN estado = false THEN 'Indisponível' END AS estado FROM livro WHERE estado = $1 ORDER BY nome;", [false]);
         console.log('Retornando todos os livros em empréstimo.');
         res.json(livros).status(200);
     } 
@@ -173,7 +168,7 @@ app.get("/consulta/livros/indisponiveis", async (req, res) => {
 /* --------------------------------------------------------------------------------------------------------------------------------------------------- */
 // ALUNO
 
-// cadastro: -- OK
+// cadastro:
 app.post("/aluno/cadastro", async (req, res) => {
     try {
         const alunoNome = req.body.nome;
@@ -198,14 +193,14 @@ app.post("/aluno/cadastro", async (req, res) => {
     }
 });
 
-// consulta: -- OK
-app.get("/aluno/consulta/:matricula", async (req, res) => {
+// consulta:
+app.get("/aluno/consulta/:matr", async (req, res) => {
     try {
-        const alunoMatr = req.params.matricula;
-        const aluno = await db.oneOrNone("SELECT * FROM aluno WHERE matricula = $1;", [alunoMatr]);
+        const alunoMatr = req.params.matr;
+        const aluno = await db.oneOrNone("SELECT nome, matricula, estado, quantidade, CASE WHEN estado = true THEN 'Permitido' WHEN estado = false THEN 'Proibido' END AS estado FROM aluno WHERE matricula = $1;", [alunoMatr]);
         
         if (aluno) {
-            res.status(200).json([aluno]); // Retorna um array com apenas um aluno
+            res.status(200).json([aluno]);
         } else {
             res.status(404).send("Aluno não encontrado");
         }
@@ -215,10 +210,10 @@ app.get("/aluno/consulta/:matricula", async (req, res) => {
     }
 });
 
-// consulta de todos: -- OK
+// consulta de todos:
 app.get("/aluno/consultas", async (req, res) => {
     try {
-        const alunos = await db.any("SELECT * FROM aluno ORDER BY nome");
+        const alunos = await db.any("SELECT nome, matricula, estado, quantidade, CASE WHEN estado = true THEN 'Permitido' WHEN estado = false THEN 'Proibido' END AS estado FROM aluno ORDER BY nome");
         
         if (alunos.length > 0) {
             res.status(200).json(alunos);
@@ -234,7 +229,7 @@ app.get("/aluno/consultas", async (req, res) => {
     }
 });
 
-// atualização: -- OK
+// atualização:
 app.put("/aluno/atualizar", async (req, res) => {
     try {
         const alunoMatr = req.body.matricula;
@@ -256,60 +251,71 @@ app.put("/aluno/atualizar", async (req, res) => {
     }
 });
 
-// exclusão: -- OK -- mas arrumar se deletar aluno arrumar emprestimo
-app.delete("/aluno/delete", async (req, res) => {
+// exclusão:
+app.delete("/aluno/deletar", async (req, res) => {
     try {
         const alunoMatr = req.body.matricula;
         const aluno = await db.oneOrNone("SELECT * FROM aluno WHERE matricula = $1", [alunoMatr]);
 
         if (aluno) {
-            await db.none("DELETE FROM aluno WHERE matricula = $1;", [alunoMatr]);
+            const emprestimo = await db.oneOrNone("SELECT * FROM emprestimo WHERE matricula = $1 AND estado = $2", [alunoMatr, false]);
+
+            if (emprestimo) {
+                console.log("O aluno tem empréstimos pendentes.");
+                return res.status(400).send("O aluno tem empréstimos pendentes e não pode ser excluído.");
+            }
+
+            await db.none("DELETE FROM aluno WHERE matricula = $1", [alunoMatr]);
             console.log("Aluno deletado com sucesso");
             res.sendStatus(200);
-        } 
-        
-        else {
+        } else {
             console.log("Aluno não encontrado");
             res.status(404).send("Aluno não encontrado");
         }
-    } 
-    
-    catch (error) {
+    } catch (error) {
         console.log(error);
-        res.sendStatus(400);
+        res.sendStatus(500);
     }
 });
+
 
 /* --------------------------------------------------------------------------------------------------------------------------------------------------- */
 // EMPRÉSTIMOS - DEVOLUÇÃO:
 
-// cadastro de empréstimo: -- NÃO OK
+// cadastro de empréstimo: -- ok mas falta arrumar as datas 
 app.post("/emprestimo/cadastro", async (req, res) => {
     try {
         const matricula = req.body.matricula;
         const livroId = req.body.idLivro;
         const id_livro = parseInt(livroId);
 
-        const livroDisponivel = await db.oneOrNone("SELECT id FROM livro WHERE id = $1 AND estado = $2", [id_livro, true]);
-        const alunoExistente = await db.oneOrNone("SELECT matricula FROM aluno WHERE matricula = $1", [matricula]);
-        let quantidadeEmprestimos = await db.oneOrNone("SELECT quantidade FROM aluno WHERE matricula = $1", [matricula]);
+        const livroDisponivel = await db.oneOrNone("SELECT * FROM livro WHERE id = $1 AND estado = $2", [id_livro, true]);
+        const aluno = await db.oneOrNone("SELECT * FROM aluno WHERE matricula = $1", [matricula]);
+        let quantEmp = parseInt(aluno.quantidade);
 
-        if (livroDisponivel && alunoExistente && quantidadeEmprestimos !== 1) {
-            //const dataEmprestimo = new Date();
-            //const dataDevolucao = new Date();
-            //dataDevolucao.setDate(dataDevolucao.getDate() + 7); // Devolução em uma semana
+        if (livroDisponivel && aluno && quantEmp !== 1) {
+            const dataEmprestimo = new Date();
+            const data_emprestimo = dataEmprestimo.toISOString().split('T')[0]; // Obtém a data atual formatada
+
+            const dataDevolucao = new Date(dataEmprestimo); // Cria uma cópia da data de empréstimo
+            dataDevolucao.setDate(dataDevolucao.getDate() + 7); // Adiciona 7 dias para a devolução
+            const data_devolucao = dataDevolucao.toISOString().split('T')[0]; // Obtém a data de devolução formatada
+
+
 
             await db.tx(async t => {
-                await t.none("INSERT INTO emprestimo (livro_id, matricula, data_emprestimo, data_devolucao, estado) VALUES ($1, $2, $3, $4, $5);", [id_livro, matricula, '2023-01-01', '2023-01-01', false]);
+                await t.none("INSERT INTO emprestimo (id_livro, matricula, data_emprestimo, data_devolucao, estado) VALUES ($1, $2, $3, $4, $5);", [id_livro, matricula, data_emprestimo, data_devolucao, false]);
                 await t.none("UPDATE livro SET estado = $1 WHERE id = $2", [false, id_livro]);
                 await t.none("UPDATE aluno SET quantidade = $1 WHERE matricula = $2", [1, matricula]);
             });
 
             res.sendStatus(200);
-        } else {
-            res.status(400).send("Não foi possível realizar o empréstimo");
-        }
-    } catch (error) {
+        } 
+        
+        else {res.status(400).send("Não foi possível realizar o empréstimo");}
+    } 
+    
+    catch (error) {
         console.log(error);
         res.sendStatus(500);
     }
@@ -318,17 +324,17 @@ app.post("/emprestimo/cadastro", async (req, res) => {
 // cadastro de devolução:
 app.put("/emprestimo/devolucao", async (req, res) => {
     try {
+        const matricula = req.body.matricula;
         const livroId = req.body.idLivro;
         const id_livro = parseInt(livroId);
-        const matricula = req.body.matricula;
 
-        const emprestimoAtual = await db.oneOrNone("SELECT * FROM emprestimo WHERE livro_id = $1 AND matricula = $2 AND estado = $3", [id_livro, matricula, true]);
+        const emprestimo = await db.oneOrNone("SELECT * FROM emprestimo WHERE id_livro = $1 AND matricula = $2 AND estado = $3", [id_livro, matricula, false]);
 
-        if (emprestimoAtual) {
+        if (emprestimo) {
             await db.tx(async t => {
                 await t.none("UPDATE livro SET estado = $1 WHERE id = $2", [true, id_livro]); // set livro true --> disponivel
                 await t.none("UPDATE aluno SET quantidade = $1 WHERE matricula = $2", [0, matricula]);
-                await t.none("UPDATE emprestimo SET estado = $1 WHERE livro_id = $2 AND usuario_id = $3", [false, id_livro, matricula]);
+                await t.none("UPDATE emprestimo SET estado = $1 WHERE id_livro = $2 AND matricula = $3", [true, id_livro, matricula]);
             });
 
             res.sendStatus(200);
@@ -343,22 +349,18 @@ app.put("/emprestimo/devolucao", async (req, res) => {
     }
 });
 
-// consulta de um empréstimo: --
-app.get("/emprestimo/consulta", async (req, res) => {
+// consulta de um empréstimo:
+app.get("/emprestimo/consulta/:matricula", async (req, res) => {
     try {
-        const matricula = req.query.matricula;
-        const idLivro = req.query.id_livro;
-        const id_livro = parseInt(idLivro);
-        
-        const emprestimos = await db.any("SELECT * FROM emprestimo WHERE id_livro = $1 AND matricula = $2", [id_livro, matricula]);
+        const matr = req.params.matricula;
+        const emprestimos = await db.any("SELECT id_emp, id_livro, matricula, data_emprestimo, data_devolucao, estado, CASE WHEN estado = true THEN 'Devolvido' WHEN estado = false THEN 'Em andamento' END AS estado FROM emprestimo WHERE matricula = $1", [matr]);
 
         if (emprestimos.length > 0) {
             res.status(200).json(emprestimos);
             console.log("Retornando empréstimo");
         } 
         
-        else {res.status(404).send("Nenhum empréstimo encontrado para essa matrícula e livro");}
-
+        else {res.status(404).send("Nenhum empréstimo encontrado para essa matrícula");}
     } 
     
     catch (error) {
@@ -367,10 +369,11 @@ app.get("/emprestimo/consulta", async (req, res) => {
     }
 });
 
-// consulta de todos os empréstimos: -- NAO OK
+// consulta de todos os empréstimos: 
 app.get("/emprestimo/consultas", async (req, res) => {
     try {
-        const emprestimos = await db.any("SELECT * FROM emprestimo ORDER BY id_emp");
+        const emprestimos = await db.any("SELECT id_emp, id_livro, matricula, data_emprestimo, data_devolucao, estado, CASE WHEN estado = true THEN 'Devolvido' WHEN estado = false THEN 'Em andamento' END AS estado FROM emprestimo ORDER BY data_emprestimo");
+        //const emprestimos = await db.any("SELECT * FROM emprestimo ORDER BY data_emprestimo");
         
         if (emprestimos.length > 0) {
             res.status(200).json(emprestimos);
@@ -386,7 +389,7 @@ app.get("/emprestimo/consultas", async (req, res) => {
     }
 });
 
-// atualização de um empréstimo: -- 
+// atualização de um empréstimo:
 app.put("/emprestimo/atualizar", async (req, res) => {
     try {
         const idEmp = req.body.id_emprestimo;
@@ -410,13 +413,25 @@ app.put("/emprestimo/atualizar", async (req, res) => {
     }
 });
 
-// exclusão de empréstimo: -- 
-app.delete("/emprestimo/deletando", async (req, res) => {
+// exclusão de empréstimo:  
+app.delete("/emprestimo/delete/:id", async (req, res) => {
     try {
-        const idEmp = req.body.id_emprestimo;
-        let id = parseInt(idEmp);
-        await db.none("DELETE FROM emprestimo WHERE id_emp = $1", [id]);
-        res.sendStatus(200);
+        const idEmp = req.params.id;
+        let id_emp = parseInt(idEmp);
+
+        const emprestimo = await db.oneOrNone("SELECT * FROM emprestimo WHERE id_emp = $1", [id_emp]);
+
+        if(emprestimo){
+            if(emprestimo.estado === true){
+                await db.oneOrNone("UPDATE livro SET estado = $1 WHERE id = $2", 
+                [true, emprestimo.id_livro]);
+                await db.oneOrNone("UPDATE aluno SET quantidade = $1, estado = $2 WHERE matricula = $3",
+                [0, true, emprestimo.matricula]);
+            }
+            await db.none("DELETE FROM emprestimo WHERE id_emp = $1", [id_emp]);
+            
+            res.sendStatus(200);
+        }
     } 
     
     catch (error) {

@@ -2,6 +2,9 @@ import React from "react";
 import axios from "axios";
 import Header from "../Header";
 
+//style
+import "./StyleLivrosIndisponiveis.css";
+
 import { Box, Stack } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
@@ -37,7 +40,7 @@ function LivrosIndisponiveis() {
     return (
         <Box>
             <Header/>
-            <Stack spacing={2}>
+            <Stack className="text" spacing={2}>
                 <Box style={{ height: "500px" }}>
                     <DataGrid rows={listaLivros} columns={colunas} />
                 </Box>

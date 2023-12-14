@@ -2,6 +2,9 @@ import React from "react";
 import axios from "axios";
 import Header from "../Header";
 
+//style
+import "./StyleDeletarAluno.css";
+
 import { Alert, Box, Button, Snackbar, Stack, TextField } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
@@ -28,9 +31,10 @@ function DeletarAluno() {
 
     async function getData() {
         try {
-            const res = await axios.get("/aluno/");
-            setListaAlunos(res.data);
-            console.log(res.data);
+            const res = await axios.get("/aluno/consultas");
+            const alunosComId = res.data.map((aluno, index) => ({ ...aluno, id: index + 1 }));
+            setListaAlunos(alunosComId);
+            console.log(alunosComId);
         } catch (error) {
             setListaAlunos([]);
         }
@@ -52,7 +56,7 @@ function DeletarAluno() {
     async function handleSubmit() {
         if (matrA !== "") {
             try {
-                await axios.delete("/aluno/delete", {
+                await axios.delete("/aluno/deletar", {
                     data: { matricula: matrA }
                 })
                 console.log(`Matricula: ${matrA}`);
@@ -84,7 +88,7 @@ function DeletarAluno() {
     return (
         <Box>
             <Header/>
-            <Stack spacing={2}>
+            <Stack className="text" spacing={2}>
                 <Stack spacing={2}>
                     <TextField
                         required
@@ -104,7 +108,7 @@ function DeletarAluno() {
                         }}
                         onClick={handleSubmit}
                         type="submit"
-                        color="primary"
+                        color="success"
                     >
                         Enviar
                     </Button>

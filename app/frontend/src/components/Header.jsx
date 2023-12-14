@@ -1,12 +1,15 @@
+import imagem from "../components/Imagens/logo6.png";
+import React from 'react';
+import './StyleHeader.css';
+
 function Header(){
-  return(
-    <div class="container-gg">   
-      <header>
-        <img src="./imagens/logo_uffs.png" alt="Logo UFFS" class="logo"/>
-        <h2 class="name-faculdade"><br/>Biblioteca - E.E.B. Druziana Sartori</h2>
-      </header>
-      <br/>
-    </div>
-  );
+    return(
+            <header className='geral'>
+                <img className='logo' src={imagem}/>
+                <h1 className='T1'>Sistema de Biblioteca</h1>
+                <h3 className='T2'>Escola de Ensino Básico Druziana Sartori</h3>
+            </header>   
+    )
 }
+
 export default Header;

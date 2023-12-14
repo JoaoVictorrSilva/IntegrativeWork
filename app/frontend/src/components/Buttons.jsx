@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Link } from "react-router-dom";
 import { Button, Container, Menu, MenuItem } from "@mui/material";
 import Header from "./Header";
 
+//style
+import "./StyleButtons.css";
+
 function Buttons() {
   const [alunoAnchorEl, setAlunoAnchorEl] = useState(null);
   const handleAlunoMenuClick = (event) => {
@@ -47,15 +50,15 @@ function Buttons() {
   return (
     <div>
       <Header />
-      <Container maxWidth="md">
+      <Container className="text" maxWidth="md">
         <nav>
           <Button
             aria-controls="aluno-menu"
             aria-haspopup="true"
             onClick={handleAlunoMenuClick}
             variant="contained"
-            color="primary"
-            style={{ margin: "10px" }}
+            color="success"
+            style={{ margin: "4px" }}
           >
             Aluno
           </Button>
@@ -84,8 +87,8 @@ function Buttons() {
             aria-haspopup="true"
             onClick={handleAutorMenuClick}
             variant="contained"
-            color="primary"
-            style={{ margin: "10px" }}
+            color="success"
+            style={{ margin: "4px" }}
           >
             Autor
           </Button>
@@ -117,8 +120,8 @@ function Buttons() {
             aria-haspopup="true"
             onClick={handleEditoraMenuClick}
             variant="contained"
-            color="primary"
-            style={{ margin: "10px" }}
+            color="success"
+            style={{ margin: "4px" }}
           >
             Editora
           </Button>
@@ -150,8 +153,8 @@ function Buttons() {
             aria-haspopup="true"
             onClick={handleEmprestimoMenuClick}
             variant="contained"
-            color="primary"
-            style={{ margin: "10px" }}
+            color="success"
+            style={{ margin: "4px" }}
           >
             Empréstimo
           </Button>
@@ -161,9 +164,6 @@ function Buttons() {
             open={Boolean(emprestimoAnchorEl)}
             onClose={handleEmprestimoMenuClose}
           >
-            <MenuItem component={Link} to="/emprestimo/atualizar" onClick={handleEmprestimoMenuClose}>
-              Atualizar
-            </MenuItem>
             <MenuItem component={Link} to="/emprestimo/cadastrar" onClick={handleEmprestimoMenuClose}>
               Cadastrar
             </MenuItem>
@@ -173,18 +173,22 @@ function Buttons() {
             <MenuItem component={Link} to="/emprestimo/delete" onClick={handleEmprestimoMenuClose}>
               Deletar
             </MenuItem>
+            <MenuItem component={Link} to="/emprestimo/atualizar" onClick={handleEmprestimoMenuClose}>
+              Devolução
+            </MenuItem>
             <MenuItem component={Link} to="/emprestimo/tabela" onClick={handleEmprestimoMenuClose}>
               Tabela
             </MenuItem>
           </Menu>
 
-          <Button
+          <Button className="button"
             aria-controls="livro-menu"
             aria-haspopup="true"
             onClick={handleLivroMenuClick}
             variant="contained"
-            color="primary"
-            style={{ margin: "10px" }}
+            color="success"
+
+            style={{ margin: "4px" }}
           >
             Livro
           </Button>
